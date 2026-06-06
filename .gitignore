@@ -1,0 +1,2 @@
+# Mac creates these hidden files automatically — we don't want them on GitHub
+.DS_Store
