@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flashcards</title>
+
+  <!-- CSS = how it looks. Same clean card style as the to-do app. -->
+  <style>
+    body {
+      font-family: -apple-system, Arial, sans-serif;
+      background: #f4f5f7;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+      margin: 0;
+    }
+
+    .card {
+      background: white;
+      width: 100%;
+      max-width: 460px;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 22px;
+      color: #1a1a2e;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    #deckInput {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #d0d3d9;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    #addDeckBtn {
+      background: #4f46e5;
+      color: white;
+      padding: 10px 16px;
+    }
+
+    #addDeckBtn:hover {
+      background: #4338ca;
+    }
+
+    /* Each deck shows as a clickable tile */
+    .deck {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      background: #f7f8fa;
+      border: 1px solid #eceef1;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .deck:hover {
+      background: #eef0fe;
+      border-color: #c7ccf7;
+    }
+
+    .deck-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .deck-count {
+      font-size: 13px;
+      color: #888;
+    }
+
+    .empty {
+      color: #999;
+      text-align: center;
+      padding: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- HTML = the structure of the page. -->
+  <div class="card">
+    <h1>🃏 My Flashcard Decks</h1>
+
+    <div class="input-row">
+      <input id="deckInput" type="text" placeholder="New deck name (e.g. Spanish verbs)" />
+      <button id="addDeckBtn">Add deck</button>
+    </div>
+
+    <!-- JavaScript fills this with deck tiles. -->
+    <div id="deckList"></div>
+  </div>
+
+  <!-- JavaScript = the behavior of the page. -->
+  <script>
+    // Grab the parts of the page we work with.
+    const deckInput = document.getElementById("deckInput");
+    const addDeckBtn = document.getElementById("addDeckBtn");
+    const deckList = document.getElementById("deckList");
+
+    // All decks live here. Each deck looks like: { name: "...", cards: [] }
+    // We load saved decks from the browser, or start with an empty list.
+    // (This is the SAME localStorage trick the to-do app uses.)
+    let decks = JSON.parse(localStorage.getItem("decks")) || [];
+
+    // Save the current decks into the browser so they survive a refresh.
+    function saveDecks() {
+      localStorage.setItem("decks", JSON.stringify(decks));
+    }
+
+    // Draw all the decks onto the page.
+    function renderDecks() {
+      deckList.innerHTML = ""; // clear what's there
+
+      if (decks.length === 0) {
+        deckList.innerHTML = '<p class="empty">No decks yet — add one above to get started!</p>';
+        return;
+      }
+
+      decks.forEach(function (deck, index) {
+        const tile = document.createElement("div");
+        tile.className = "deck";
+
+        // The deck name.
+        const name = document.createElement("span");
+        name.className = "deck-name";
+        name.textContent = deck.name;
+
+        // How many cards the deck has.
+        const count = document.createElement("span");
+        count.className = "deck-count";
+        const n = deck.cards.length;
+        count.textContent = n + (n === 1 ? " card" : " cards");
+
+        // Clicking a deck will OPEN it for studying — that's a later ticket.
+        // For now we just show a placeholder so the click is wired up.
+        tile.onclick = function () {
+          alert('Studying "' + deck.name + '" is coming soon! (next ticket)');
+        };
+
+        tile.appendChild(name);
+        tile.appendChild(count);
+        deckList.appendChild(tile);
+      });
+    }
+
+    // Add a new deck from whatever is typed in the box.
+    function addDeck() {
+      const name = deckInput.value.trim();
+      if (name === "") return; // ignore empty input
+
+      decks.push({ name: name, cards: [] });
+      deckInput.value = ""; // clear the box
+      saveDecks();
+      renderDecks();
+    }
+
+    // Wire up the button and the Enter key.
+    addDeckBtn.onclick = addDeck;
+    deckInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") addDeck();
+    });
+
+    // Draw the decks when the page first loads.
+    renderDecks();
+  </script>
+</body>
+</html>
